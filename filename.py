@@ -1,0 +1,8 @@
+adagrad.py
+adam.py
+basic.py
+full.py
+mom.py
+rms.py
+sgd.py
+xor.py
