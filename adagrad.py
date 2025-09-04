@@ -1,65 +1,85 @@
 import numpy as np
 
-# Sigmoid activation function
-def sigmoid(x):
-    return 1 / (1 + np.exp(-x))
+# Define the function and its gradients
+def f(x, y):
+    return x**2 + y**2
 
-# Derivative of sigmoid
-def sigmoid_derivative(x):
-    return x * (1 - x)
+def grad_f(x, y):
+    return np.array([2 * x, 2 * y])
 
-# Training data (XOR example)
-X = np.array([[0,0],
-              [0,1],
-              [1,0],
-              [1,1]])
+# Parameters
+eta = 0.1  # Learning rate
+epsilon = 1e-8  # Convergence threshold
+x = -0.1659  # Initial x
+y = 0.4406   # Initial y
+bounds = [-1, 1]  # Bounds for x and y
 
-y = np.array([[0],
-              [1],
-              [1],
-              [0]])
+# Initialize sum of squared gradients
+sum_sq_grad = np.array([0.0, 0.0])
 
-# Seed for reproducibility
-np.random.seed(42)
+# Iteration counter
+iteration = 0
+max_iterations = 10000  # Safety limit
 
-# Initialize weights and biases
-input_layer_size = 2
-hidden_layer_size = 4
-output_layer_size = 1
+while True:
+    # Compute gradients
+    grad = grad_f(x, y)
 
-W1 = np.random.randn(input_layer_size, hidden_layer_size)
-b1 = np.zeros((1, hidden_layer_size))
-W2 = np.random.randn(hidden_layer_size, output_layer_size)
-b2 = np.zeros((1, output_layer_size))
+    # Update sum of squared gradients
+    sum_sq_grad += grad**2
 
-# Training parameters
-learning_rate = 0.1
-epochs = 10000
+    # Compute adaptive learning rate
+    adaptive_lr = eta / (np.sqrt(sum_sq_grad) + epsilon)
 
-for epoch in range(epochs):
-    # Forward pass
-    z1 = np.dot(X, W1) + b1
-    a1 = sigmoid(z1)
-    z2 = np.dot(a1, W2) + b2
-    a2 = sigmoid(z2)
+    # Update parameters
+    x -= adaptive_lr[0] * grad[0]
+    y -= adaptive_lr[1] * grad[1]
 
-    # Loss (mean squared error)
-    loss = np.mean((y - a2) ** 2)
+    # Enforce bounds
+    x = np.clip(x, bounds[0], bounds[1])
+    y = np.clip(y, bounds[0], bounds[1])
 
-    # Backpropagation
-    error_output = (a2 - y) * sigmoid_derivative(a2)
-    error_hidden = np.dot(error_output, W2.T) * sigmoid_derivative(a1)
+    # Increment iteration
+    iteration += 1
 
-    # Update weights and biases
-    W2 -= learning_rate * np.dot(a1.T, error_output)
-    b2 -= learning_rate * np.sum(error_output, axis=0, keepdims=True)
-    W1 -= learning_rate * np.dot(X.T, error_hidden)
-    b1 -= learning_rate * np.sum(error_hidden, axis=0, keepdims=True)
+    # Print progress at each iteration
+    print(f"Iteration {iteration}: x = {x:.8f}, y = {y:.8f}, f(x, y) = {f(x, y):.8f}")
 
-    # Print progress
-    if epoch % 1000 == 0:
-        print(f"Epoch {epoch}, Loss: {loss:.4f}")
+    # Check convergence
+    if np.linalg.norm(grad) < epsilon or iteration >= max_iterations:
+        break
 
-# Test predictions
-print("Predictions:")
-print(a2)
+# Output results
+print(f"\nFinal x: {x:.8f}, y: {y:.8f}")
+print(f"Function value: {f(x, y):.8f}")
+print(f"Total Iterations: {iteration}")
+
+
+
+
+'''import numpy as np
+
+def xavier_init(n_in, n_out, shape):
+    """ Xavier (Glorot) initialization with normal distribution """
+    std = np.sqrt(2.0 / (n_in + n_out))
+    return np.random.normal(0, std, shape)
+
+def he_init(n_in, shape):
+    """ He (Kaiming) initialization with normal distribution """
+    std = np.sqrt(2.0 / n_in)
+    return np.random.normal(0, std, shape)
+
+# Example dimensions
+n_in = 64
+n_out = 32
+
+# Xavier initialization
+w1_xavier = xavier_init(n_in, n_out, (n_in, n_out))
+w2_xavier = xavier_init(n_out, n_in, (n_out, n_in))
+
+# He initialization
+w1_he = he_init(n_in, (n_in, n_out))
+w2_he = he_init(n_out, (n_out, n_in))
+
+print("Xavier w1:", w1_xavier.shape, " | std ≈", np.std(w1_xavier))
+print("He w1:", w1_he.shape, " | std ≈", np.std(w1_he))'''
