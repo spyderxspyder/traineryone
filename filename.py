@@ -6,3 +6,5 @@ mom.py
 rms.py
 sgd.py
 xor.py
+final.py
+cg.py
