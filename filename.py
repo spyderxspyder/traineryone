@@ -8,3 +8,4 @@ sgd.py
 xor.py
 final.py
 cg.py
+read.py
